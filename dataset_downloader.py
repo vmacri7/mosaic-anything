@@ -14,6 +14,7 @@ class DatasetDownloader:
         """
         self.base_path = base_path
         self.api = KaggleApi()
+        self.image_extensions = ('.jpg', '.jpeg', '.png', '.bmp')  # what counts as an "image"
         
     def _create_dataset_directory(self, dataset_name: str) -> str:
         """
@@ -24,7 +25,7 @@ class DatasetDownloader:
         os.makedirs(images_path, exist_ok=True)
         return dataset_path
 
-    def _extract_images(self, zip_path: str, dataset_path: str, image_extensions: tuple = ('.jpg', '.jpeg', '.png', '.bmp')):
+    def _extract_images(self, zip_path: str, dataset_path: str):
         """
         extract images from the downloaded zip file to the dataset directory.        
         """
@@ -32,7 +33,7 @@ class DatasetDownloader:
         
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             # get list of all files in the zip
-            files = [f for f in zip_ref.namelist() if f.lower().endswith(image_extensions)]
+            files = [f for f in zip_ref.namelist() if f.lower().endswith(self.image_extensions)]
             
             print(f"extracting {len(files)} images...")
             # First extract all files to a temporary directory
@@ -45,7 +46,7 @@ class DatasetDownloader:
             # Move all images to the images directory
             for root, _, files in os.walk(temp_dir):
                 for file in files:
-                    if file.lower().endswith(image_extensions):
+                    if file.lower().endswith(self.image_extensions):
                         src_path = os.path.join(root, file)
                         dst_path = os.path.join(images_path, file)
                         shutil.move(src_path, dst_path)
@@ -53,13 +54,12 @@ class DatasetDownloader:
             # Clean up temporary directory
             shutil.rmtree(temp_dir)
 
-    def download_dataset(self, dataset_url: str, image_extensions: tuple = ('.jpg', '.jpeg', '.png', '.bmp')):
+    def download_dataset(self, dataset_url: str):
         """
         download a dataset from kaggle using the dataset url.
         
         args:
             dataset_url (str): kaggle dataset url or dataset reference (e.g., 'username/dataset-name') 
-            image_extensions (tuple): file extensions to consider as images
         """
         # extract username and dataset name from url if full url is provided
         if "kaggle.com/datasets/" in dataset_url:
@@ -84,7 +84,7 @@ class DatasetDownloader:
             # extract images from the downloaded zip
             zip_path = os.path.join(dataset_path, f"{dataset_name}.zip")
             if os.path.exists(zip_path):
-                self._extract_images(zip_path, dataset_path, image_extensions)
+                self._extract_images(zip_path, dataset_path)
                 # clean up zip file
                 os.remove(zip_path)
                 print(f"successfully downloaded and extracted images to {os.path.join(dataset_path, 'images')}")
@@ -95,3 +95,32 @@ class DatasetDownloader:
             print(f"error downloading dataset: {str(e)}")
             if "404" in str(e):
                 print("dataset not found. please check the dataset url or reference.")
+
+    def duplicate_check(self, dataset_url: str):
+        """
+        check if a dataset is already downloaded as a subfolder and return its name and image count
+        args:
+            dataset_url (str): kaggle dataset url or dataset reference (e.g., 'username/dataset-name') 
+        returns:
+            tuple: (bool, str, int) - whether the dataset exists, the dataset name, and the number of images
+        """
+
+        if "kaggle.com/datasets/" in dataset_url:
+            dataset_ref = dataset_url.split("kaggle.com/datasets/")[1].strip('/')
+        else:
+            dataset_ref = dataset_url.strip('/')
+            
+        dataset_name = dataset_ref.split('/')[-1]
+        dataset_path = os.path.join(self.base_path, dataset_name)
+        images_path = os.path.join(dataset_path, "images")
+        
+        if os.path.exists(dataset_path) and os.path.isdir(dataset_path):
+            if os.path.exists(images_path) and os.path.isdir(images_path):
+                # count number of image files
+                image_count = len([
+                    f for f in os.listdir(images_path) 
+                    if os.path.isfile(os.path.join(images_path, f)) and f.lower().endswith(self.image_extensions)
+                ])
+                return True, dataset_name, image_count
+            return True, dataset_name, 0
+        return False, dataset_name, 0
