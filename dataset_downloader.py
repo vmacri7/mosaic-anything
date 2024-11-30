@@ -14,7 +14,7 @@ class DatasetDownloader:
         """
         self.base_path = base_path
         self.api = KaggleApi()
-        self.image_extensions = ('.jpg', '.jpeg', '.png', '.bmp')  # what counts as an "image"
+        self.image_extensions = ('.jpg')  # what counts as an "image"
         
     def _create_dataset_directory(self, dataset_name: str) -> str:
         """
