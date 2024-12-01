@@ -4,11 +4,13 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import tqdm
+from PIL import Image
+import pillow_heif
 
 class Mosaic:
     def __init__(self, avg_colors_csv: str, target_image_path: str, output_width: int, mosaic_image_size: int):
         """
-        initialize the mosaic creator.
+        initialize mosaic creator.
         
         args:
             avg_colors_csv (str): path to csv containing image names and their average rgb values
@@ -18,7 +20,7 @@ class Mosaic:
         """
         self.mosaic_image_size = mosaic_image_size
         self.output_width = output_width
-        self.target_image = cv2.imread(target_image_path)
+        self.target_image = self._read_image(target_image_path)
         if self.target_image is None:
             raise ValueError(f"could not read target image: {target_image_path}")
             
@@ -31,7 +33,7 @@ class Mosaic:
         
     def _setup_color_matching(self, avg_colors_csv: str):
         """
-        setup the color matching system using a k-d tree for efficient nearest neighbor search.
+        setup the color matching system using a k-d tree.
         """
         self.color_data = pd.read_csv(avg_colors_csv)
         
@@ -79,6 +81,52 @@ class Mosaic:
         
         # resize to mosaic tile size
         return cv2.resize(crop, (self.mosaic_image_size, self.mosaic_image_size))
+    
+
+    def _read_image(self, image_path: str) -> np.ndarray:
+        """
+        read an image file in various formats.
+        
+        args:
+            image_path (str): path to the image file
+            
+        returns:
+            np.ndarray: image in BGR format for opencv compatibility
+        """
+        # get file extension
+        ext = os.path.splitext(image_path)[1].lower()
+        
+        try:
+            if ext in ['.heic', '.heif']:
+                # register heif opener
+                pillow_heif.register_heif_opener()
+                
+                # open heic image
+                with Image.open(image_path) as img:
+                    img = img.convert('RGB')
+                    img_array = np.array(img)
+                    return cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+            else:
+                # try opencv first
+                img = cv2.imread(image_path)
+                if img is not None:
+                    return img
+                    
+                # if opencv fails, try PIL
+                try:
+                    with Image.open(image_path) as img:
+                        img = img.convert('RGB')
+                        img_array = np.array(img)
+                        return cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+                except Exception as e:
+                    print(f"error reading image with PIL: {e}")
+                    return None
+                    
+        except Exception as e:
+            print(f"error reading image: {e}")
+            return None
+
+
     
     def create_mosaic(self, output_path: str = None):
         """
