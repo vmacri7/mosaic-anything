@@ -12,8 +12,6 @@ export function ImageUploader({ targetImage, onFileUpload, onRandomImage, fileIn
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // create a blob URL for preview
-      const objectUrl = URL.createObjectURL(file);
       onFileUpload(event);
     }
   };

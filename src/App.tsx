@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Github, Globe, Heart } from 'lucide-react';
 import { DatasetUploader } from './components/DatasetUploader';
 import { DatasetList } from './components/DatasetList';
 import { ImageUploader } from './components/ImageUploader';
@@ -189,7 +189,9 @@ function App() {
                   fileInputRef={fileInputRef}
                 />
               </div>
+            </div>
 
+            <div className="space-y-4 sm:space-y-6">
               <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
                 <h2 className="text-lg sm:text-xl font-semibold mb-4">3. Configure Mosaic</h2>
                 <MosaicConfig
@@ -199,7 +201,6 @@ function App() {
                   setTileSize={setTileSize}
                 />
               </div>
-
               <button
                 onClick={handleCreateMosaic}
                 disabled={!selectedDataset || !targetImage || isProcessing}
@@ -214,15 +215,40 @@ function App() {
                   'Create Mosaic'
                 )}
               </button>
-            </div>
 
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-              <h2 className="text-lg sm:text-xl font-semibold mb-4">Result</h2>
-              <ResultDisplay result={result} />
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md flex-grow">
+                <h2 className="text-lg sm:text-xl font-semibold mb-4">Result</h2>
+                <ResultDisplay result={result} />
+              </div>
             </div>
           </div>
         )}
       </div>
+      <footer className="mt-8 pb-6 text-center">
+        <p className="flex items-center justify-center gap-2 text-gray-600 mb-2">
+          Made with <Heart className="text-red-500 fill-current" size={16} /> by Vincenzo
+        </p>
+        <div className="flex items-center justify-center gap-4">
+          <a
+            href="https://github.com/vmacri7/mosaic-anything"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1"
+          >
+            <Github size={18} />
+            <span>GitHub</span>
+          </a>
+          <a
+            href="https://macri.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1"
+          >
+            <Globe size={18} />
+            <span>Portfolio</span>
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
