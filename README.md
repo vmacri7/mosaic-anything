@@ -70,4 +70,8 @@ npm run dev
    - Tile size (unit: pixels)
 7. Click "Create Mosaic"
 8. Mosaic artwork will be displayed under Results
-9. Download your masterpiece!
+9. Download your masterpiece! (all mosaics are also saved locally to the `mosaics` folder)
+
+## 📝 License
+
+This project is released under the [MIT License](https://github.com/vmacri7/mosaic-anything/blob/main/LICENSE).

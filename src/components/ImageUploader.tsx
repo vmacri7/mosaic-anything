@@ -30,25 +30,25 @@ export function ImageUploader({ targetImage, onFileUpload, onRandomImage, fileIn
         </button>
         <button
           onClick={onRandomImage}
-          className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center justify-center px-4 py-2 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
         >
           <Image className="mr-2" size={20} />
           <span className="text-sm sm:text-base">Random Image</span>
         </button>
       </div>
       <input
-        ref={fileInputRef}
         type="file"
-        accept="image/*"
+        ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
+        accept="image/jpeg,image/png,image/webp"
       />
       {targetImage && (
         <div className="mt-4">
           <img
             src={targetImage}
             alt="Target"
-            className="w-full h-48 object-cover rounded-lg"
+            className="w-full h-auto rounded-lg shadow-md"
           />
         </div>
       )}

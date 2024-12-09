@@ -22,8 +22,8 @@ app.add_middleware(
 )
 
 # configure upload folder
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+MOSAIC_FOLDER = 'mosaics'
+os.makedirs(MOSAIC_FOLDER, exist_ok=True)
 
 # initialize components
 downloader = DatasetDownloader()
@@ -78,7 +78,7 @@ async def create_mosaic(
 ):
     try:
         # Save uploaded file
-        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file_path = os.path.join(MOSAIC_FOLDER, file.filename)
         with open(file_path, "wb") as f:
             content = await file.read()
             f.write(content)
@@ -100,7 +100,7 @@ async def create_mosaic(
         
         # Generate unique filename for output
         output_filename = f"mosaic_{int(time.time())}.jpg"
-        output_path = os.path.join(UPLOAD_FOLDER, output_filename)
+        output_path = os.path.join(MOSAIC_FOLDER, output_filename)
         
         # Create mosaic
         mosaic_creator.create_mosaic(output_path)
@@ -116,7 +116,7 @@ async def create_mosaic(
 
 @app.get("/mosaic/{filename}")
 async def serve_mosaic(filename: str):
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(MOSAIC_FOLDER, filename)
     if os.path.exists(file_path):
         return FileResponse(
             file_path,
